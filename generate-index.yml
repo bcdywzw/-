@@ -38,7 +38,6 @@ jobs:
 
           // 生成页面列表
           const pages = files.map(f => {
-            // 读取文件获取标题
             let title = f.replace('.html', '');
             let icon = '📄';
             
@@ -60,11 +59,6 @@ jobs:
           const regex = /const AUTO_PAGES = \[[\s\S]*?\];/;
           if (regex.test(indexHtml)) {
             indexHtml = indexHtml.replace(regex, pagesCode);
-          } else {
-            // 如果没有找到，替换整个 script 块
-            const scriptRegex = /<script>[\s\S]*?const AUTO_PAGES = \[[\s\S]*?\];[\s\S]*?<\/script>/;
-            const newScript = `<script>\n        // 🔗 页面链接列表 - 每次 GitHub Actions 自动更新\n        // 请勿手动修改此部分\n        \n        ${pagesCode}\n    </script>`;
-            indexHtml = indexHtml.replace(scriptRegex, newScript);
           }
 
           // 写回文件
