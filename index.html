@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的网页作品集</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", sans-serif;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 60px 20px;
+            background: linear-gradient(145deg, #0a0a0a 0%, #151515 50%, #0d0d0d 100%);
+            min-height: 100vh;
+            color: #e8e4df;
+        }
+        
+        .container {
+            text-align: center;
+        }
+        
+        h1 {
+            font-size: clamp(2rem, 5vw, 3rem);
+            color: #d4a574;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+        
+        .subtitle {
+            color: #9a9590;
+            margin-bottom: 50px;
+            font-size: 1rem;
+        }
+        
+        .links {
+            list-style: none;
+            padding: 0;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+        
+        .links a {
+            display: flex;
+            align-items: center;
+            padding: 20px 25px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: #e8e4df;
+            text-decoration: none;
+            border-radius: 12px;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            backdrop-filter: blur(10px);
+        }
+        
+        .links a:hover {
+            background: rgba(212, 165, 116, 0.1);
+            border-color: #d4a574;
+            color: #d4a574;
+            transform: translateY(-4px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        .links .icon {
+            font-size: 1.5rem;
+            margin-right: 15px;
+            flex-shrink: 0;
+        }
+        
+        .links .filename {
+            font-size: 0.95rem;
+            word-break: break-all;
+        }
+        
+        .empty {
+            color: #9a9590;
+            padding: 40px;
+            font-style: italic;
+        }
+        
+        .footer {
+            margin-top: 60px;
+            padding-top: 30px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: #9a9590;
+            font-size: 0.85rem;
+        }
+        
+        /* Loading state */
+        .loading {
+            color: #9a9590;
+            font-size: 1.1rem;
+        }
+        
+        .loading::after {
+            content: '';
+            animation: dots 1.5s infinite;
+        }
+        
+        @keyframes dots {
+            0%, 20% { content: '.'; }
+            40% { content: '..'; }
+            60%, 100% { content: '...'; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌳 我的网页作品集</h1>
+        <p class="subtitle">点击下方链接访问各页面</p>
+        
+        <ul class="links" id="links">
+            <li class="loading">正在加载页面列表</li>
+        </ul>
+        
+        <p class="footer">
+            自动生成于 <span id="date"></span>
+        </p>
+    </div>
+
+    <script>
+        // 自动扫描当前目录下的所有 HTML 文件并生成链接
+        (function() {
+            const linksContainer = document.getElementById('links');
+            const dateSpan = document.getElementById('date');
+            
+            // 获取当前页面的目录
+            const currentPath = window.location.pathname;
+            const basePath = currentPath.substring(0, currentPath.lastIndexOf('/') + 1);
+            
+            // 页面标题映射（可选自定义）
+            const titles = {
+                'ai-era-org-management.html': '📄 AI时代组织管理新十条'
+            };
+            
+            // 自动扫描的 HTML 文件列表
+            // 注意：这个列表需要手动维护，或者用 GitHub Actions 自动生成
+            const pages = [
+                { file: 'ai-era-org-management.html', icon: '📄' }
+                // 在这里添加更多页面...
+                // { file: '其他文件.html', icon: '📄' }
+            ];
+            
+            // 如果有自动生成脚本注入的数据，使用它
+            if (typeof AUTO_PAGES !== 'undefined') {
+                renderPages(AUTO_PAGES);
+            } else {
+                // 否则使用手动定义的列表
+                renderPages(pages);
+            }
+            
+            function renderPages(pages) {
+                linksContainer.innerHTML = '';
+                
+                if (!pages || pages.length === 0) {
+                    linksContainer.innerHTML = '<li class="empty">暂无页面，请上传 HTML 文件</li>';
+                    return;
+                }
+                
+                pages.forEach(page => {
+                    const li = document.createElement('li');
+                    const title = titles[page.file] || page.icon + ' ' + page.file.replace('.html', '');
+                    li.innerHTML = `<a href="${basePath}${page.file}"><span class="icon">${page.icon}</span><span class="filename">${title.replace(page.icon + ' ', '')}</span></a>`;
+                    linksContainer.appendChild(li);
+                });
+            }
+            
+            // 显示日期
+            const now = new Date();
+            dateSpan.textContent = now.toLocaleDateString('zh-CN') + ' ' + now.toLocaleTimeString('zh-CN');
+        })();
+    </script>
+    
+    <!-- 
+    以下是自动生成的页面列表，请勿删除！
+    每次上传新文件后，这个列表会自动更新。
+    -->
+    <script>
+        // 🔗 页面链接列表 - 每次 GitHub Actions 自动更新
+        // 请勿手动修改此部分
+        
+        const AUTO_PAGES = [
+            
+        ];
+    </script>
+</body>
+</html>

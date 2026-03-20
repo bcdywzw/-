@@ -1,0 +1,81 @@
+# GitHub Actions: 自动生成首页链接列表
+# 每次推送 HTML 文件后自动运行
+
+name: Generate Index
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '**.html'
+  workflow_dispatch:
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Generate index.html
+        run: |
+          node << 'EOF'
+          const fs = require('fs');
+          const path = require('path');
+
+          // 读取现有 index.html
+          let indexHtml = fs.readFileSync('index.html', 'utf8');
+
+          // 扫描所有 HTML 文件
+          const files = fs.readdirSync('.')
+            .filter(f => f.endsWith('.html') && f !== 'index.html')
+            .sort();
+
+          // 生成页面列表
+          const pages = files.map(f => {
+            // 读取文件获取标题
+            let title = f.replace('.html', '');
+            let icon = '📄';
+            
+            try {
+              const content = fs.readFileSync(f, 'utf8');
+              const titleMatch = content.match(/<title>([^<]+)<\/title>/i);
+              if (titleMatch) {
+                title = titleMatch[1];
+              }
+            } catch (e) {}
+
+            return { file: f, icon, title };
+          });
+
+          // 生成新的 AUTO_PAGES 代码
+          const pagesCode = 'const AUTO_PAGES = ' + JSON.stringify(pages, null, 8) + ';';
+
+          // 替换 index.html 中的 AUTO_PAGES 部分
+          const regex = /const AUTO_PAGES = \[[\s\S]*?\];/;
+          if (regex.test(indexHtml)) {
+            indexHtml = indexHtml.replace(regex, pagesCode);
+          } else {
+            // 如果没有找到，替换整个 script 块
+            const scriptRegex = /<script>[\s\S]*?const AUTO_PAGES = \[[\s\S]*?\];[\s\S]*?<\/script>/;
+            const newScript = `<script>\n        // 🔗 页面链接列表 - 每次 GitHub Actions 自动更新\n        // 请勿手动修改此部分\n        \n        ${pagesCode}\n    </script>`;
+            indexHtml = indexHtml.replace(scriptRegex, newScript);
+          }
+
+          // 写回文件
+          fs.writeFileSync('index.html', indexHtml);
+
+          console.log('Generated index with ' + pages.length + ' pages:');
+          pages.forEach(p => console.log('  - ' + p.file));
+          EOF
+
+      - name: Commit and push
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "🤖 自动更新首页链接列表"
+          file_pattern: "index.html"
